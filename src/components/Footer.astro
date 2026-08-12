@@ -1,0 +1,53 @@
+---
+import { profile } from "@/data/profile";
+import { NAV_LINKS } from "@/consts";
+
+const year = new Date().getFullYear();
+---
+
+<footer class="mt-24 border-t border-border bg-surface/60">
+  <div class="container-wide grid gap-10 py-14 sm:grid-cols-3">
+    <div>
+      <h2 class="section-label">소개</h2>
+      <p class="font-serif text-base font-bold">{profile.name}</p>
+      <p class="mt-1 text-sm text-muted">{profile.role}</p>
+      <p class="text-sm text-muted">{profile.office}</p>
+    </div>
+
+    <div>
+      <h2 class="section-label">연락</h2>
+      <ul class="space-y-1.5 text-sm text-muted">
+        <li>
+          <a href={`mailto:${profile.email}`} class="link-underline"
+            >{profile.email}</a
+          >
+        </li>
+        <li>{profile.region}</li>
+      </ul>
+    </div>
+
+    <div>
+      <h2 class="section-label">바로가기</h2>
+      <ul class="grid grid-cols-2 gap-x-4 gap-y-1.5 text-sm text-muted">
+        {
+          NAV_LINKS.filter((l) => l.href !== "/").map((link) => (
+            <li>
+              <a href={link.href} class="link-underline">
+                {link.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+
+  <div class="border-t border-border">
+    <div
+      class="container-wide flex flex-col gap-1 py-6 text-xs text-muted sm:flex-row sm:items-center sm:justify-between"
+    >
+      <p>© {year} {profile.name}. All rights reserved.</p>
+      <p>사이트의 글과 이미지는 저작자에게 저작권이 있습니다.</p>
+    </div>
+  </div>
+</footer>

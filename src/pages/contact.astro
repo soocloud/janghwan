@@ -1,0 +1,57 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import PageHeader from "@/components/PageHeader.astro";
+import { profile } from "@/data/profile";
+
+const contacts = [
+  {
+    label: "이메일",
+    value: profile.email,
+    href: `mailto:${profile.email}`,
+  },
+  {
+    label: "소속",
+    value: `${profile.office} ${profile.role.replace(`${profile.office} `, "")}`,
+  },
+  {
+    label: "지역",
+    value: profile.region,
+  },
+];
+---
+
+<Layout
+  title="연락처"
+  description={`${profile.name}에게 연락하기 — ${profile.email}`}
+>
+  <div class="container-page" data-pagefind-body>
+    <PageHeader
+      eyebrow="Contact"
+      title="연락처"
+      description="강의·자문·집필 문의는 언제든 편하게 연락 주세요."
+    />
+
+    <dl class="divide-y divide-border">
+      {
+        contacts.map((item) => (
+          <div class="grid gap-1 py-4 sm:grid-cols-[7rem_1fr] sm:gap-6">
+            <dt class="text-sm font-medium text-muted">{item.label}</dt>
+            <dd>
+              {item.href ? (
+                <a href={item.href} class="link-underline">
+                  {item.value}
+                </a>
+              ) : (
+                item.value
+              )}
+            </dd>
+          </div>
+        ))
+      }
+    </dl>
+
+    <p class="mt-10 text-sm leading-relaxed text-muted">
+      강의·자문·집필 문의는 이메일로 보내 주시면 확인 후 회신드립니다.
+    </p>
+  </div>
+</Layout>

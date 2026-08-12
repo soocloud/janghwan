@@ -1,0 +1,89 @@
+---
+import { Image } from "astro:assets";
+
+import Layout from "@/layouts/Layout.astro";
+import PageHeader from "@/components/PageHeader.astro";
+import Timeline from "@/components/Timeline.astro";
+import profilePhoto from "@/assets/profile.jpg";
+import {
+  profile,
+  bio,
+  education,
+  currentPositions,
+  pastPositions,
+  awards,
+} from "@/data/profile";
+---
+
+<Layout
+  title="소개"
+  description={`${profile.name} — ${profile.role}. 학력, 주요 경력, 수상 이력.`}
+>
+  <div class="container-page" data-pagefind-body>
+    <PageHeader
+      eyebrow="About"
+      title="소개"
+      description={`${profile.name} · ${profile.nameHanja} · ${profile.nameEn} — ${profile.role}`}
+    />
+
+    <section class="sm:flex sm:items-start sm:gap-10">
+      <Image
+        src={profilePhoto}
+        alt={`${profile.name} 프로필 사진`}
+        width={360}
+        height={450}
+        class="mb-8 w-36 rounded-xl border border-border object-cover sm:order-2 sm:mb-0 sm:w-44"
+      />
+      <div class="space-y-4 leading-relaxed sm:order-1 sm:flex-1">
+        {bio.map((paragraph) => <p>{paragraph}</p>)}
+        <p class="text-sm text-muted">
+          {profile.birthYear}년생 · {profile.roleSub}
+        </p>
+      </div>
+    </section>
+
+    <section class="mt-16">
+      <h2 class="section-title">학력</h2>
+      <Timeline
+        items={education.map((item) => ({
+          period: item.period,
+          primary: item.school,
+          secondary: item.major,
+          note: item.status,
+        }))}
+      />
+    </section>
+
+    <section class="mt-16">
+      <h2 class="section-title">현재 직(職)</h2>
+      <Timeline
+        items={currentPositions.map((item) => ({
+          period: item.period,
+          primary: item.org,
+          secondary: item.title,
+        }))}
+      />
+    </section>
+
+    <section class="mt-16">
+      <h2 class="section-title">역임</h2>
+      <Timeline
+        items={pastPositions.map((item) => ({
+          period: item.period,
+          primary: item.org,
+          secondary: item.title,
+        }))}
+      />
+    </section>
+
+    <section class="mt-16">
+      <h2 class="section-title">수상</h2>
+      <Timeline
+        items={awards.map((item) => ({
+          period: item.year,
+          primary: item.title,
+        }))}
+      />
+    </section>
+  </div>
+</Layout>

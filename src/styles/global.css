@@ -1,0 +1,181 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ---------------------------------------------------------------
+   색상 토큰 — 학술 사이트 느낌의 차분한 중립색 + 먹색 계열 포인트
+   --------------------------------------------------------------- */
+@layer base {
+  :root {
+    --bg: 253 253 251; /* 아주 옅은 아이보리 */
+    --surface: 255 255 255;
+    --fg: 26 26 26;
+    --muted: 106 108 112;
+    --border: 226 226 222;
+    --accent: 30 58 95; /* 감청(紺靑) */
+    --accent-soft: 237 241 247;
+    --sun: 190 60 60;
+    --sat: 42 92 158;
+  }
+
+  .dark {
+    --bg: 17 19 22;
+    --surface: 24 27 31;
+    --fg: 232 232 230;
+    --muted: 154 158 165;
+    --border: 46 51 58;
+    --accent: 149 184 224;
+    --accent-soft: 30 38 50;
+    --sun: 226 132 132;
+    --sat: 138 178 232;
+  }
+}
+
+@theme inline {
+  --color-bg: rgb(var(--bg));
+  --color-surface: rgb(var(--surface));
+  --color-fg: rgb(var(--fg));
+  --color-muted: rgb(var(--muted));
+  --color-border: rgb(var(--border));
+  --color-accent: rgb(var(--accent));
+  --color-accent-soft: rgb(var(--accent-soft));
+  --color-sun: rgb(var(--sun));
+  --color-sat: rgb(var(--sat));
+
+  --font-sans:
+    "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
+    system-ui, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic",
+    "맑은 고딕", sans-serif;
+  --font-serif:
+    "Noto Serif KR", "Nanum Myeongjo", "Apple SD Gothic Neo", Georgia, serif;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    /* 한글 가독성: 단어 단위 줄바꿈 */
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
+
+  body {
+    @apply bg-bg font-sans text-fg antialiased;
+    /* 한글 본문은 자간을 살짝 좁히면 더 정돈되어 보입니다 */
+    letter-spacing: -0.01em;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-serif tracking-tight;
+    letter-spacing: -0.02em;
+  }
+
+  ::selection {
+    @apply bg-accent/20;
+  }
+
+  :focus-visible {
+    @apply rounded-sm outline-2 outline-offset-2 outline-accent;
+  }
+
+  hr {
+    @apply border-border;
+  }
+}
+
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-3xl px-5 sm:px-6;
+  }
+
+  .container-wide {
+    @apply mx-auto w-full max-w-5xl px-5 sm:px-6;
+  }
+
+  /* 섹션 제목 — al-folio 스타일의 소문자 라벨 느낌 */
+  .section-title {
+    @apply mb-6 text-2xl font-bold text-fg sm:text-3xl;
+  }
+
+  .section-label {
+    @apply mb-3 text-xs font-semibold tracking-[0.18em] text-muted uppercase;
+  }
+
+  .link-underline {
+    @apply underline decoration-accent/40 decoration-1 underline-offset-4 transition-colors hover:decoration-accent;
+  }
+
+  .card {
+    @apply rounded-lg border border-border bg-surface;
+  }
+
+  .pill {
+    @apply inline-flex items-center rounded-full border border-border px-3 py-1 text-sm text-muted transition-colors hover:border-accent hover:text-accent;
+  }
+}
+
+/* ---------------------------------------------------------------
+   본문(Markdown) 타이포그래피
+   --------------------------------------------------------------- */
+@layer components {
+  .prose-hanmun {
+    @apply prose prose-lg max-w-none;
+    --tw-prose-body: rgb(var(--fg));
+    --tw-prose-headings: rgb(var(--fg));
+    --tw-prose-lead: rgb(var(--muted));
+    --tw-prose-links: rgb(var(--accent));
+    --tw-prose-bold: rgb(var(--fg));
+    --tw-prose-counters: rgb(var(--muted));
+    --tw-prose-bullets: rgb(var(--border));
+    --tw-prose-hr: rgb(var(--border));
+    --tw-prose-quotes: rgb(var(--fg));
+    --tw-prose-quote-borders: rgb(var(--accent));
+    --tw-prose-captions: rgb(var(--muted));
+    --tw-prose-code: rgb(var(--fg));
+    --tw-prose-pre-bg: rgb(var(--surface));
+    --tw-prose-th-borders: rgb(var(--border));
+    --tw-prose-td-borders: rgb(var(--border));
+    line-height: 1.85;
+  }
+
+  .prose-hanmun :where(p) {
+    @apply my-5;
+  }
+
+  .prose-hanmun :where(h2) {
+    @apply mt-10 mb-4 text-2xl;
+  }
+
+  .prose-hanmun :where(h3) {
+    @apply mt-8 mb-3 text-xl;
+  }
+
+  .prose-hanmun :where(blockquote) {
+    @apply not-italic;
+  }
+
+  .prose-hanmun :where(img) {
+    @apply mx-auto rounded-lg border border-border;
+  }
+}
+
+/* Pagefind 검색 UI를 사이트 색상에 맞춤 */
+#search-ui {
+  --pagefind-ui-primary: rgb(var(--accent));
+  --pagefind-ui-text: rgb(var(--fg));
+  --pagefind-ui-background: rgb(var(--bg));
+  --pagefind-ui-border: rgb(var(--border));
+  --pagefind-ui-tag: rgb(var(--accent-soft));
+  --pagefind-ui-border-width: 1px;
+  --pagefind-ui-border-radius: 8px;
+  --pagefind-ui-font: var(--font-sans);
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}

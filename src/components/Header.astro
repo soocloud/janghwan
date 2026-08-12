@@ -1,0 +1,142 @@
+---
+import { NAV_LINKS } from "@/consts";
+import { profile } from "@/data/profile";
+import ThemeToggle from "@/components/ThemeToggle.astro";
+
+const path = Astro.url.pathname;
+
+function isActive(href: string) {
+  if (href === "/") return path === "/";
+  return path.startsWith(href);
+}
+---
+
+<header
+  class="sticky top-0 z-40 border-b border-border bg-bg/85 backdrop-blur-md"
+>
+  <div class="container-wide flex h-16 items-center justify-between gap-4">
+    <a
+      href="/"
+      class="font-serif text-lg font-bold tracking-tight whitespace-nowrap"
+    >
+      {profile.name}<span class="ml-2 text-sm font-normal text-muted"
+        >{profile.nameHanja}</span
+      >
+    </a>
+
+    <nav aria-label="주 메뉴" class="hidden items-center gap-1 md:flex">
+      {
+        NAV_LINKS.map((link) => (
+          <a
+            href={link.href}
+            aria-current={isActive(link.href) ? "page" : undefined}
+            class:list={[
+              "rounded-md px-3 py-2 text-sm transition-colors",
+              isActive(link.href)
+                ? "font-semibold text-accent"
+                : "text-muted hover:text-fg",
+            ]}
+          >
+            {link.label}
+          </a>
+        ))
+      }
+      <a
+        href="/search/"
+        aria-label="검색"
+        class="rounded-md p-2 text-muted transition-colors hover:text-fg"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          aria-hidden="true"
+        >
+          <circle cx="11" cy="11" r="7"></circle>
+          <path d="m20 20-3.5-3.5"></path>
+        </svg>
+      </a>
+      <ThemeToggle />
+    </nav>
+
+    <div class="flex items-center gap-1 md:hidden">
+      <ThemeToggle />
+      <button
+        type="button"
+        id="menu-toggle"
+        aria-label="메뉴 열기"
+        aria-expanded="false"
+        aria-controls="mobile-nav"
+        class="rounded-md p-2 text-muted hover:text-fg"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          aria-hidden="true"
+        >
+          <path d="M3 6h18M3 12h18M3 18h18"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <nav
+    id="mobile-nav"
+    aria-label="모바일 메뉴"
+    class="container-wide hidden border-t border-border py-3 md:hidden"
+  >
+    <ul class="flex flex-col">
+      {
+        NAV_LINKS.map((link) => (
+          <li>
+            <a
+              href={link.href}
+              aria-current={isActive(link.href) ? "page" : undefined}
+              class:list={[
+                "block rounded-md px-2 py-2.5",
+                isActive(link.href)
+                  ? "font-semibold text-accent"
+                  : "text-muted hover:text-fg",
+              ]}
+            >
+              {link.label}
+            </a>
+          </li>
+        ))
+      }
+      <li>
+        <a
+          href="/search/"
+          class="block rounded-md px-2 py-2.5 text-muted hover:text-fg"
+        >
+          검색
+        </a>
+      </li>
+    </ul>
+  </nav>
+</header>
+
+<script>
+  // astro:page-load 는 최초 로드와 뷰 트랜지션 이후 모두 발생합니다.
+  document.addEventListener("astro:page-load", () => {
+    const button = document.getElementById("menu-toggle");
+    const nav = document.getElementById("mobile-nav");
+    if (!button || !nav) return;
+    button.addEventListener("click", () => {
+      const closed = nav.classList.toggle("hidden");
+      button.setAttribute("aria-expanded", String(!closed));
+      button.setAttribute("aria-label", closed ? "메뉴 열기" : "메뉴 닫기");
+    });
+  });
+</script>

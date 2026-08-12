@@ -1,0 +1,179 @@
+---
+import { Image } from "astro:assets";
+
+import Layout from "@/layouts/Layout.astro";
+import Calendar from "@/components/Calendar.astro";
+import HistoryList from "@/components/HistoryList.astro";
+import profilePhoto from "@/assets/profile.jpg";
+import {
+  profile,
+  affiliations,
+  bio,
+  awards,
+  currentPositions,
+} from "@/data/profile";
+import { getHistoryEntries, toDateMap, monthPath } from "@/utils/history";
+import { toMonthKey, todayInSeoul, formatKoreanMonth } from "@/utils/date";
+
+const entries = await getHistoryEntries();
+const entryMap = toDateMap(entries);
+
+const today = todayInSeoul();
+const currentMonth = today.slice(0, 7);
+const availableMonths = [
+  ...new Set([
+    currentMonth,
+    ...entries.map((entry) => toMonthKey(entry.data.date)),
+  ]),
+].sort();
+
+// 이번 달에 기록이 없으면 가장 최근 기록이 있는 달을 보여 줍니다.
+const monthKey =
+  entryMap.size > 0 &&
+  !entries.some((e) => toMonthKey(e.data.date) === currentMonth)
+    ? toMonthKey(entries[0]!.data.date)
+    : currentMonth;
+
+const recent = entries.slice(0, 4);
+---
+
+<Layout>
+  <div class="container-page" data-pagefind-body>
+    {/* ── 프로필 ───────────────────────────────────── */}
+    <section class="sm:flex sm:items-start sm:gap-10">
+      <div class="mb-8 shrink-0 sm:order-2 sm:mb-0 sm:w-56">
+        <Image
+          src={profilePhoto}
+          alt={`${profile.name} 프로필 사진`}
+          width={448}
+          height={560}
+          loading="eager"
+          class="w-40 rounded-xl border border-border object-cover shadow-sm sm:w-56"
+        />
+        <dl class="mt-5 space-y-1.5 text-sm text-muted">
+          <div>
+            <dt class="sr-only">소속</dt>
+            <dd>{profile.office}</dd>
+          </div>
+          <div>
+            <dt class="sr-only">지역</dt>
+            <dd>{profile.region}</dd>
+          </div>
+          <div>
+            <dt class="sr-only">이메일</dt>
+            <dd>
+              <a href={`mailto:${profile.email}`} class="link-underline">
+                {profile.email}
+              </a>
+            </dd>
+          </div>
+        </dl>
+      </div>
+
+      <div class="sm:order-1 sm:flex-1">
+        <h1 class="text-4xl font-bold sm:text-5xl">{profile.name}</h1>
+        <p class="mt-2 text-sm text-muted">
+          {profile.nameHanja} · {profile.nameEn}
+        </p>
+        <p class="mt-4 text-lg leading-relaxed">
+          {affiliations.join(" · ")}
+        </p>
+        <p class="mt-3 font-serif text-base text-accent">
+          “{profile.tagline}”
+        </p>
+
+        <div class="mt-6 space-y-4 leading-relaxed">
+          {bio.map((paragraph) => <p>{paragraph}</p>)}
+        </div>
+
+        <div class="mt-7 flex flex-wrap gap-2">
+          <a href="/about/" class="pill">자세히 보기 →</a>
+          <a href="/publications/" class="pill">저술·논문</a>
+          <a href="/lectures/" class="pill">강의·활동</a>
+        </div>
+      </div>
+    </section>
+
+    {/* ── 오늘의 역사 ───────────────────────────────── */}
+    <section class="mt-20">
+      <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p class="section-label mb-1">매일 한 편</p>
+          <h2 class="text-2xl font-bold sm:text-3xl">
+            <a href="/history/" class="transition-colors hover:text-accent">
+              오늘의 역사
+            </a>
+          </h2>
+        </div>
+        <a href="/history/" class="link-underline text-sm text-accent">
+          전체 보기 →
+        </a>
+      </div>
+
+      <p class="mb-6 text-sm leading-relaxed text-muted">
+        날짜를 누르면 그날 있었던 역사적 사실을 정리한 카드를 볼 수 있습니다.
+        {" "}{formatKoreanMonth(monthKey)} 달력입니다.
+      </p>
+
+      <Calendar
+        monthKey={monthKey}
+        entryMap={entryMap}
+        availableMonths={availableMonths}
+        today={today}
+        titleHref={monthPath(monthKey)}
+      />
+
+      {
+        recent.length > 0 && (
+          <div class="mt-10">
+            <h3 class="section-label">최근 기록</h3>
+            <HistoryList entries={recent} />
+          </div>
+        )
+      }
+    </section>
+
+    {/* ── 주요 활동 · 수상 ──────────────────────────── */}
+    <section class="mt-20 grid gap-12 sm:grid-cols-2">
+      <div>
+        <h2 class="section-label">현재 활동</h2>
+        <ul class="divide-y divide-border text-sm">
+          {
+            currentPositions.slice(0, 5).map((item) => (
+              <li class="flex gap-4 py-3">
+                <span class="w-24 shrink-0 text-muted tabular-nums">
+                  {item.period}
+                </span>
+                <span>
+                  {item.org} <span class="text-muted">{item.title}</span>
+                </span>
+              </li>
+            ))
+          }
+        </ul>
+        <a
+          href="/lectures/"
+          class="link-underline mt-4 inline-block text-sm text-accent"
+        >
+          강의·활동 전체 보기 →
+        </a>
+      </div>
+
+      <div>
+        <h2 class="section-label">수상</h2>
+        <ul class="divide-y divide-border text-sm">
+          {
+            awards.map((award) => (
+              <li class="flex gap-4 py-3">
+                <span class="w-24 shrink-0 text-muted tabular-nums">
+                  {award.year}
+                </span>
+                <span class="font-medium">{award.title}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </section>
+  </div>
+</Layout>

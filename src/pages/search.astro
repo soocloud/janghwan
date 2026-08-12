@@ -1,0 +1,55 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import PageHeader from "@/components/PageHeader.astro";
+---
+
+<Layout title="검색" description="사이트 안의 글을 검색합니다." noindex>
+  <div class="container-page">
+    <PageHeader
+      eyebrow="Search"
+      title="검색"
+      description="'오늘의 역사'와 소개·저술 페이지의 내용을 함께 찾습니다."
+    />
+    <div id="search-ui"></div>
+    <noscript>
+      <p class="text-sm text-muted">
+        검색 기능을 쓰려면 자바스크립트를 켜 주세요.
+      </p>
+    </noscript>
+  </div>
+</Layout>
+
+<style is:global>
+  @import "@pagefind/default-ui/css/ui.css";
+</style>
+
+<script>
+  // Pagefind 번들은 빌드 후에 생성되므로 런타임에 동적 로드합니다.
+  document.addEventListener("astro:page-load", async () => {
+    const container = document.getElementById("search-ui");
+    if (!container || container.dataset.ready === "true") return;
+
+    try {
+      const { PagefindUI } = await import("@pagefind/default-ui");
+      new PagefindUI({
+        element: "#search-ui",
+        showSubResults: true,
+        showImages: false,
+        translations: {
+          placeholder: "검색어를 입력하세요",
+          clear_search: "지우기",
+          load_more: "더 보기",
+          search_label: "사이트 검색",
+          zero_results: "‘[SEARCH_TERM]’에 대한 결과가 없습니다.",
+          many_results: "‘[SEARCH_TERM]’ 검색 결과 [COUNT]건",
+          one_result: "‘[SEARCH_TERM]’ 검색 결과 1건",
+          searching: "‘[SEARCH_TERM]’ 검색 중…",
+        },
+      });
+      container.dataset.ready = "true";
+    } catch {
+      container.innerHTML =
+        '<p class="text-muted text-sm">검색 색인은 배포된 사이트에서만 동작합니다. (npm run build 후 확인)</p>';
+    }
+  });
+</script>

@@ -1,0 +1,70 @@
+---
+import { Image } from "astro:assets";
+
+import type { HistoryEntry } from "@/utils/history";
+import { historyPath } from "@/utils/history";
+import { formatKoreanDate, toISODate } from "@/utils/date";
+
+interface Props {
+  entries: HistoryEntry[];
+  emptyMessage?: string;
+}
+
+const { entries, emptyMessage = "아직 등록된 기록이 없습니다." } = Astro.props;
+---
+
+{
+  entries.length === 0 ? (
+    <p class="card px-5 py-10 text-center text-sm text-muted">{emptyMessage}</p>
+  ) : (
+    <ul class="divide-y divide-border">
+      {entries.map((entry) => {
+        const iso = toISODate(entry.data.date);
+        return (
+          <li>
+            <a
+              href={historyPath(entry)}
+              class="group -mx-3 flex items-start gap-4 rounded-lg px-3 py-5 transition-colors hover:bg-accent-soft/60"
+            >
+              {entry.data.image && (
+                <Image
+                  src={entry.data.image}
+                  alt=""
+                  width={112}
+                  height={112}
+                  loading="lazy"
+                  class="h-20 w-20 shrink-0 rounded-md border border-border object-cover sm:h-24 sm:w-24"
+                />
+              )}
+              <div class="min-w-0 flex-1">
+                <time
+                  datetime={iso}
+                  class="text-xs font-medium tracking-wide text-muted"
+                >
+                  {formatKoreanDate(iso)}
+                </time>
+                <h3 class="mt-1 text-lg leading-snug font-bold transition-colors group-hover:text-accent">
+                  {entry.data.title}
+                </h3>
+                {entry.data.summary && (
+                  <p class="mt-1.5 line-clamp-2 text-sm leading-relaxed text-muted">
+                    {entry.data.summary}
+                  </p>
+                )}
+                {entry.data.tags.length > 0 && (
+                  <ul class="mt-2 flex flex-wrap gap-2 text-xs text-muted">
+                    {entry.data.tags.map((tag) => (
+                      <li class="rounded-full border border-border px-2 py-0.5">
+                        #{tag}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+  )
+}

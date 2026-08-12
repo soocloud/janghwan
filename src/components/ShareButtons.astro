@@ -1,0 +1,73 @@
+---
+interface Props {
+  title: string;
+  url: string;
+}
+
+const { title, url } = Astro.props;
+---
+
+<div
+  class="no-print flex flex-wrap items-center gap-2"
+  data-share
+  data-url={url}
+  data-title={title}
+>
+  <span class="mr-1 text-sm text-muted">공유하기</span>
+
+  <button type="button" data-share-native class="pill hidden"> 공유 </button>
+
+  <button type="button" data-share-copy class="pill">
+    <span data-copy-label>링크 복사</span>
+  </button>
+
+  <a
+    class="pill"
+    target="_blank"
+    rel="noopener noreferrer"
+    href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`}
+  >
+    페이스북
+  </a>
+
+  <button type="button" data-share-print class="pill">인쇄</button>
+</div>
+
+<script>
+  document.addEventListener("astro:page-load", () => {
+    const root = document.querySelector<HTMLElement>("[data-share]");
+    if (!root) return;
+
+    const url = root.dataset.url ?? location.href;
+    const title = root.dataset.title ?? document.title;
+
+    const nativeButton = root.querySelector<HTMLButtonElement>(
+      "[data-share-native]",
+    );
+    if (nativeButton && typeof navigator.share === "function") {
+      nativeButton.classList.remove("hidden");
+      nativeButton.addEventListener("click", () => {
+        navigator.share({ title, url }).catch(() => {});
+      });
+    }
+
+    root
+      .querySelector<HTMLButtonElement>("[data-share-copy]")
+      ?.addEventListener("click", async () => {
+        const label = root.querySelector<HTMLElement>("[data-copy-label]");
+        try {
+          await navigator.clipboard.writeText(url);
+          if (label) {
+            label.textContent = "복사했습니다";
+            setTimeout(() => (label.textContent = "링크 복사"), 1800);
+          }
+        } catch {
+          if (label) label.textContent = "복사 실패";
+        }
+      });
+
+    root
+      .querySelector<HTMLButtonElement>("[data-share-print]")
+      ?.addEventListener("click", () => window.print());
+  });
+</script>

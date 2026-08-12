@@ -1,0 +1,41 @@
+---
+interface Item {
+  period: string;
+  primary: string;
+  secondary?: string;
+  note?: string;
+}
+
+interface Props {
+  items: Item[];
+}
+
+const { items } = Astro.props;
+---
+
+<ul class="divide-y divide-border">
+  {
+    items.map((item) => (
+      <li class="grid gap-1 py-4 sm:grid-cols-[9.5rem_1fr] sm:gap-6">
+        <p class="pt-0.5 text-sm font-medium text-muted tabular-nums">
+          {item.period}
+        </p>
+        <div>
+          <p class="font-medium">
+            {item.primary}
+            {item.note && (
+              <span class="ml-2 text-xs font-normal text-muted">
+                {item.note}
+              </span>
+            )}
+          </p>
+          {item.secondary && (
+            <p class="mt-0.5 text-sm leading-relaxed text-muted">
+              {item.secondary}
+            </p>
+          )}
+        </div>
+      </li>
+    ))
+  }
+</ul>

@@ -1,0 +1,35 @@
+# build output
+dist/
+.astro/
+
+# dependencies
+node_modules/
+
+# python (프로필 PDF 텍스트 추출에 쓰인 임시 환경 — 지워도 됩니다)
+.venv/
+
+# 개인정보가 담긴 원본 프로필 자료 — 절대 커밋/공개하지 않습니다
+profile/
+*.pdf
+
+# pagefind
+public/pagefind/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# environment variables
+.env
+.env.production
+
+# macOS / Windows
+.DS_Store
+Thumbs.db
+
+# editor
+.vscode/*
+!.vscode/extensions.json
+.idea/

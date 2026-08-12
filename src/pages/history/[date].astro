@@ -1,0 +1,154 @@
+---
+import type { GetStaticPaths } from "astro";
+import { Image } from "astro:assets";
+import { render } from "astro:content";
+
+import Layout from "@/layouts/Layout.astro";
+import ShareButtons from "@/components/ShareButtons.astro";
+import {
+  getHistoryEntries,
+  historyPath,
+  monthPath,
+  type HistoryEntry,
+} from "@/utils/history";
+import { formatKoreanDate, toISODate, toMonthKey } from "@/utils/date";
+
+export const getStaticPaths = (async () => {
+  const entries = await getHistoryEntries();
+  // 최신순 정렬이므로 index+1 이 '이전 날', index-1 이 '다음 날' 입니다.
+  return entries.map((entry, index) => ({
+    params: { date: toISODate(entry.data.date) },
+    props: {
+      entry,
+      olderEntry: entries[index + 1] ?? null,
+      newerEntry: entries[index - 1] ?? null,
+    },
+  }));
+}) satisfies GetStaticPaths;
+
+interface Props {
+  entry: HistoryEntry;
+  olderEntry: HistoryEntry | null;
+  newerEntry: HistoryEntry | null;
+}
+
+const { entry, olderEntry, newerEntry } = Astro.props;
+const { Content } = await render(entry);
+
+const iso = toISODate(entry.data.date);
+const monthKey = toMonthKey(entry.data.date);
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const description =
+  entry.data.summary ?? `${formatKoreanDate(iso, false)} — ${entry.data.title}`;
+---
+
+<Layout
+  title={entry.data.title}
+  description={description}
+  ogType="article"
+  publishedAt={entry.data.date.toISOString()}
+  ogImage={entry.data.image?.src}
+>
+  <article class="container-page" data-pagefind-body>
+    <nav class="no-print mb-8 text-sm">
+      <a
+        href={monthPath(monthKey)}
+        class="text-muted transition-colors hover:text-accent"
+      >
+        ← 달력으로 돌아가기
+      </a>
+    </nav>
+
+    <header class="mb-10 border-b border-border pb-8">
+      <p class="section-label mb-2">오늘의 역사</p>
+      <time datetime={iso} class="block font-serif text-lg text-accent">
+        {formatKoreanDate(iso)}
+      </time>
+      <h1 class="mt-2 text-3xl leading-tight font-bold sm:text-4xl">
+        {entry.data.title}
+      </h1>
+      {
+        entry.data.summary && (
+          <p class="mt-4 leading-relaxed text-muted">{entry.data.summary}</p>
+        )
+      }
+    </header>
+
+    {
+      entry.data.image && (
+        <figure class="mb-10">
+          <Image
+            src={entry.data.image}
+            alt={entry.data.imageAlt ?? entry.data.title}
+            widths={[480, 720, 1080]}
+            sizes="(max-width: 768px) 100vw, 720px"
+            loading="eager"
+            class="mx-auto w-full rounded-lg border border-border shadow-sm"
+          />
+          <figcaption class="no-print mt-3 text-center text-xs text-muted">
+            <a
+              href={entry.data.image.src}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="link-underline"
+            >
+              원본 이미지 보기
+            </a>
+          </figcaption>
+        </figure>
+      )
+    }
+
+    <div class="prose-hanmun">
+      <Content />
+    </div>
+
+    {
+      entry.data.tags.length > 0 && (
+        <ul class="mt-10 flex flex-wrap gap-2">
+          {entry.data.tags.map((tag) => (
+            <li class="pill cursor-default text-xs">#{tag}</li>
+          ))}
+        </ul>
+      )
+    }
+
+    <div class="mt-10 border-t border-border pt-8">
+      <ShareButtons title={entry.data.title} url={canonical} />
+    </div>
+
+    <nav
+      class="no-print mt-12 grid gap-4 border-t border-border pt-8 sm:grid-cols-2"
+      aria-label="이전/다음 기록"
+    >
+      {
+        olderEntry ? (
+          <a
+            href={historyPath(olderEntry)}
+            class="card group px-5 py-4 transition-colors hover:border-accent"
+          >
+            <p class="text-xs text-muted">← 이전 기록</p>
+            <p class="mt-1 font-medium transition-colors group-hover:text-accent">
+              {olderEntry.data.title}
+            </p>
+          </a>
+        ) : (
+          <span />
+        )
+      }
+      {
+        newerEntry && (
+          <a
+            href={historyPath(newerEntry)}
+            class="card group px-5 py-4 text-right transition-colors hover:border-accent sm:col-start-2"
+          >
+            <p class="text-xs text-muted">다음 기록 →</p>
+            <p class="mt-1 font-medium transition-colors group-hover:text-accent">
+              {newerEntry.data.title}
+            </p>
+          </a>
+        )
+      }
+    </nav>
+  </article>
+</Layout>

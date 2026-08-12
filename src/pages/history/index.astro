@@ -1,0 +1,73 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import PageHeader from "@/components/PageHeader.astro";
+import Calendar from "@/components/Calendar.astro";
+import HistoryList from "@/components/HistoryList.astro";
+import { getHistoryEntries, toDateMap, monthPath } from "@/utils/history";
+import { toMonthKey, todayInSeoul, formatKoreanMonth } from "@/utils/date";
+
+const entries = await getHistoryEntries();
+const entryMap = toDateMap(entries);
+
+const today = todayInSeoul();
+const currentMonth = today.slice(0, 7);
+const availableMonths = [
+  ...new Set([
+    currentMonth,
+    ...entries.map((entry) => toMonthKey(entry.data.date)),
+  ]),
+].sort();
+
+const monthKey =
+  entries.length > 0 &&
+  !entries.some((entry) => toMonthKey(entry.data.date) === currentMonth)
+    ? toMonthKey(entries[0]!.data.date)
+    : currentMonth;
+
+const archiveMonths = [...availableMonths].reverse();
+---
+
+<Layout
+  title="오늘의 역사"
+  description="김장환이 매일 한 편씩 기록하는 '오늘의 역사'. 달력에서 날짜를 눌러 그날의 이야기를 읽어 보세요."
+>
+  <div class="container-page">
+    <PageHeader
+      eyebrow="Today in History"
+      title="오늘의 역사"
+      description="하루에 한 편, 그날 있었던 역사적 사실을 정리해 나눕니다. 달력에서 날짜를 누르면 그날의 기록이 열립니다."
+    />
+
+    <Calendar
+      monthKey={monthKey}
+      entryMap={entryMap}
+      availableMonths={availableMonths}
+      today={today}
+    />
+
+    <section class="mt-14">
+      <h2 class="section-title">최근 기록</h2>
+      <HistoryList
+        entries={entries.slice(0, 12)}
+        emptyMessage="첫 번째 기록을 기다리고 있습니다."
+      />
+    </section>
+
+    {
+      archiveMonths.length > 0 && (
+        <section class="mt-14">
+          <h2 class="section-label">월별로 보기</h2>
+          <ul class="flex flex-wrap gap-2">
+            {archiveMonths.map((month) => (
+              <li>
+                <a href={monthPath(month)} class="pill">
+                  {formatKoreanMonth(month)}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+  </div>
+</Layout>
