@@ -6,48 +6,48 @@ import { render } from "astro:content";
 import Layout from "@/layouts/Layout.astro";
 import ShareButtons from "@/components/ShareButtons.astro";
 import {
-  getHistoryEntries,
+  getHistoryItems,
   historyPath,
   monthPath,
-  type HistoryEntry,
+  monthKeyOf,
+  type HistoryItem,
 } from "@/utils/history";
-import { formatKoreanDate, toISODate, toMonthKey } from "@/utils/date";
+import { formatKoreanDate } from "@/utils/date";
 
 export const getStaticPaths = (async () => {
-  const entries = await getHistoryEntries();
+  const items = await getHistoryItems();
   // 최신순 정렬이므로 index+1 이 '이전 날', index-1 이 '다음 날' 입니다.
-  return entries.map((entry, index) => ({
-    params: { date: toISODate(entry.data.date) },
+  return items.map((item, index) => ({
+    params: { date: item.date },
     props: {
-      entry,
-      olderEntry: entries[index + 1] ?? null,
-      newerEntry: entries[index - 1] ?? null,
+      item,
+      olderItem: items[index + 1] ?? null,
+      newerItem: items[index - 1] ?? null,
     },
   }));
 }) satisfies GetStaticPaths;
 
 interface Props {
-  entry: HistoryEntry;
-  olderEntry: HistoryEntry | null;
-  newerEntry: HistoryEntry | null;
+  item: HistoryItem;
+  olderItem: HistoryItem | null;
+  newerItem: HistoryItem | null;
 }
 
-const { entry, olderEntry, newerEntry } = Astro.props;
-const { Content } = await render(entry);
+const { item, olderItem, newerItem } = Astro.props;
+const Content = item.entry ? (await render(item.entry)).Content : null;
 
-const iso = toISODate(entry.data.date);
-const monthKey = toMonthKey(entry.data.date);
+const monthKey = monthKeyOf(item.date);
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
 const description =
-  entry.data.summary ?? `${formatKoreanDate(iso, false)} — ${entry.data.title}`;
+  item.summary ?? `${formatKoreanDate(item.date, false)} — ${item.title}`;
 ---
 
 <Layout
-  title={entry.data.title}
+  title={item.title}
   description={description}
   ogType="article"
-  publishedAt={entry.data.date.toISOString()}
-  ogImage={entry.data.image?.src}
+  publishedAt={`${item.date}T00:00:00+09:00`}
+  ogImage={item.image?.src}
 >
   <article class="container-page" data-pagefind-body>
     <nav class="no-print mb-8 text-sm">
@@ -61,25 +61,25 @@ const description =
 
     <header class="mb-10 border-b border-border pb-8">
       <p class="section-label mb-2">오늘의 역사</p>
-      <time datetime={iso} class="block font-serif text-lg text-accent">
-        {formatKoreanDate(iso)}
+      <time datetime={item.date} class="block font-serif text-lg text-accent">
+        {formatKoreanDate(item.date)}
       </time>
       <h1 class="mt-2 text-3xl leading-tight font-bold sm:text-4xl">
-        {entry.data.title}
+        {item.title}
       </h1>
       {
-        entry.data.summary && (
-          <p class="mt-4 leading-relaxed text-muted">{entry.data.summary}</p>
+        item.summary && (
+          <p class="mt-4 leading-relaxed text-muted">{item.summary}</p>
         )
       }
     </header>
 
     {
-      entry.data.image && (
+      item.image && (
         <figure class="mb-10">
           <Image
-            src={entry.data.image}
-            alt={entry.data.imageAlt ?? entry.data.title}
+            src={item.image}
+            alt={item.imageAlt ?? item.title}
             widths={[480, 720, 1080]}
             sizes="(max-width: 768px) 100vw, 720px"
             loading="eager"
@@ -87,7 +87,7 @@ const description =
           />
           <figcaption class="no-print mt-3 text-center text-xs text-muted">
             <a
-              href={entry.data.image.src}
+              href={item.image.src}
               target="_blank"
               rel="noopener noreferrer"
               class="link-underline"
@@ -99,14 +99,18 @@ const description =
       )
     }
 
-    <div class="prose-hanmun">
-      <Content />
-    </div>
+    {
+      Content && (
+        <div class="prose-hanmun">
+          <Content />
+        </div>
+      )
+    }
 
     {
-      entry.data.tags.length > 0 && (
+      item.tags.length > 0 && (
         <ul class="mt-10 flex flex-wrap gap-2">
-          {entry.data.tags.map((tag) => (
+          {item.tags.map((tag) => (
             <li class="pill cursor-default text-xs">#{tag}</li>
           ))}
         </ul>
@@ -114,7 +118,7 @@ const description =
     }
 
     <div class="mt-10 border-t border-border pt-8">
-      <ShareButtons title={entry.data.title} url={canonical} />
+      <ShareButtons title={item.title} url={canonical} />
     </div>
 
     <nav
@@ -122,14 +126,14 @@ const description =
       aria-label="이전/다음 기록"
     >
       {
-        olderEntry ? (
+        olderItem ? (
           <a
-            href={historyPath(olderEntry)}
+            href={historyPath(olderItem)}
             class="card group px-5 py-4 transition-colors hover:border-accent"
           >
             <p class="text-xs text-muted">← 이전 기록</p>
             <p class="mt-1 font-medium transition-colors group-hover:text-accent">
-              {olderEntry.data.title}
+              {olderItem.title}
             </p>
           </a>
         ) : (
@@ -137,14 +141,14 @@ const description =
         )
       }
       {
-        newerEntry && (
+        newerItem && (
           <a
-            href={historyPath(newerEntry)}
+            href={historyPath(newerItem)}
             class="card group px-5 py-4 text-right transition-colors hover:border-accent sm:col-start-2"
           >
             <p class="text-xs text-muted">다음 기록 →</p>
             <p class="mt-1 font-medium transition-colors group-hover:text-accent">
-              {newerEntry.data.title}
+              {newerItem.title}
             </p>
           </a>
         )

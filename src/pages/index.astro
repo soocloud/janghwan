@@ -12,26 +12,28 @@ import {
   awards,
   currentPositions,
 } from "@/data/profile";
-import { getHistoryEntries, toDateMap, monthPath } from "@/utils/history";
-import { toMonthKey, todayInSeoul, formatKoreanMonth } from "@/utils/date";
+import {
+  getHistoryItems,
+  toDateMap,
+  monthPath,
+  monthKeyOf,
+} from "@/utils/history";
+import { todayInSeoul, formatKoreanMonth } from "@/utils/date";
 
-const entries = await getHistoryEntries();
+const entries = await getHistoryItems();
 const entryMap = toDateMap(entries);
 
 const today = todayInSeoul();
 const currentMonth = today.slice(0, 7);
 const availableMonths = [
-  ...new Set([
-    currentMonth,
-    ...entries.map((entry) => toMonthKey(entry.data.date)),
-  ]),
+  ...new Set([currentMonth, ...entries.map((item) => monthKeyOf(item.date))]),
 ].sort();
 
 // 이번 달에 기록이 없으면 가장 최근 기록이 있는 달을 보여 줍니다.
 const monthKey =
   entryMap.size > 0 &&
-  !entries.some((e) => toMonthKey(e.data.date) === currentMonth)
-    ? toMonthKey(entries[0]!.data.date)
+  !entries.some((item) => monthKeyOf(item.date) === currentMonth)
+    ? monthKeyOf(entries[0]!.date)
     : currentMonth;
 
 const recent = entries.slice(0, 4);

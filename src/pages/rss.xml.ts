@@ -2,11 +2,11 @@ import rss from "@astrojs/rss";
 import type { APIRoute } from "astro";
 
 import { SITE } from "@/consts";
-import { getHistoryEntries, historyPath } from "@/utils/history";
-import { formatKoreanDate, toISODate } from "@/utils/date";
+import { getHistoryItems, historyPath } from "@/utils/history";
+import { formatKoreanDate } from "@/utils/date";
 
 export const GET: APIRoute = async (context) => {
-  const entries = await getHistoryEntries();
+  const items = await getHistoryItems();
 
   return rss({
     title: `${SITE.author} — 오늘의 역사`,
@@ -14,16 +14,13 @@ export const GET: APIRoute = async (context) => {
     site: context.site ?? SITE.website,
     trailingSlash: true,
     customData: "<language>ko-kr</language>",
-    items: entries.map((entry) => {
-      const iso = toISODate(entry.data.date);
-      return {
-        title: entry.data.title,
-        description:
-          entry.data.summary ?? `${formatKoreanDate(iso, false)}의 기록`,
-        pubDate: entry.data.date,
-        link: historyPath(entry),
-        categories: [...entry.data.tags],
-      };
-    }),
+    items: items.map((item) => ({
+      title: item.title,
+      description:
+        item.summary ?? `${formatKoreanDate(item.date, false)}의 기록`,
+      pubDate: new Date(`${item.date}T00:00:00+09:00`),
+      link: historyPath(item),
+      categories: [...item.tags],
+    })),
   });
 };

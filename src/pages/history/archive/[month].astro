@@ -6,35 +6,31 @@ import PageHeader from "@/components/PageHeader.astro";
 import Calendar from "@/components/Calendar.astro";
 import HistoryList from "@/components/HistoryList.astro";
 import {
-  getHistoryEntries,
+  getHistoryItems,
   toDateMap,
   groupByMonth,
-  type HistoryEntry,
+  monthKeyOf,
+  type HistoryItem,
 } from "@/utils/history";
-import {
-  toMonthKey,
-  todayInSeoul,
-  formatKoreanMonth,
-  monthRange,
-} from "@/utils/date";
+import { todayInSeoul, formatKoreanMonth, monthRange } from "@/utils/date";
 
 export const getStaticPaths = (async () => {
-  const entries = await getHistoryEntries();
+  const items = await getHistoryItems();
   const today = todayInSeoul();
   const currentMonth = today.slice(0, 7);
 
-  const monthKeys = entries.map((entry) => toMonthKey(entry.data.date));
+  const monthKeys = items.map((item) => monthKeyOf(item.date));
   const from = monthKeys.length ? [...monthKeys].sort()[0]! : currentMonth;
   const to = [currentMonth, ...monthKeys].sort().at(-1)!;
 
   const months = monthRange(from, to);
-  const byMonth = groupByMonth(entries);
+  const byMonth = groupByMonth(items);
 
   return months.map((month) => ({
     params: { month },
     props: {
       entries: (byMonth.get(month) ?? []).slice().reverse(),
-      allEntries: entries,
+      allEntries: items,
       availableMonths: months,
       today,
     },
@@ -42,8 +38,8 @@ export const getStaticPaths = (async () => {
 }) satisfies GetStaticPaths;
 
 interface Props {
-  entries: HistoryEntry[];
-  allEntries: HistoryEntry[];
+  entries: HistoryItem[];
+  allEntries: HistoryItem[];
   availableMonths: string[];
   today: string;
 }

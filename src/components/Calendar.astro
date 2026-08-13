@@ -1,5 +1,5 @@
 ---
-import type { HistoryEntry } from "@/utils/history";
+import type { HistoryItem } from "@/utils/history";
 import { historyPath, monthPath } from "@/utils/history";
 import {
   WEEKDAYS_KO,
@@ -13,8 +13,8 @@ import {
 interface Props {
   /** 'YYYY-MM' */
   monthKey: string;
-  /** 'YYYY-MM-DD' -> 글 */
-  entryMap: Map<string, HistoryEntry>;
+  /** 'YYYY-MM-DD' -> 기록 */
+  entryMap: Map<string, HistoryItem>;
   /** 이동 가능한 월 목록 ('YYYY-MM') */
   availableMonths: string[];
   /** 오늘 (한국 기준) */
@@ -173,8 +173,8 @@ const countThisMonth = Array.from(entryMap.keys()).filter((d) =>
           return (
             <a
               href={historyPath(entry)}
-              title={entry.data.title}
-              aria-label={`${month}월 ${day}일 — ${entry.data.title}`}
+              title={entry.title}
+              aria-label={`${month}월 ${day}일 — ${entry.title}`}
               class:list={[
                 "group flex h-14 flex-col items-center justify-center rounded-md bg-accent-soft text-sm font-semibold transition-colors hover:bg-accent sm:h-16",
                 isToday ? "ring-2 ring-accent" : "",

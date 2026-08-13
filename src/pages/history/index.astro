@@ -3,25 +3,27 @@ import Layout from "@/layouts/Layout.astro";
 import PageHeader from "@/components/PageHeader.astro";
 import Calendar from "@/components/Calendar.astro";
 import HistoryList from "@/components/HistoryList.astro";
-import { getHistoryEntries, toDateMap, monthPath } from "@/utils/history";
-import { toMonthKey, todayInSeoul, formatKoreanMonth } from "@/utils/date";
+import {
+  getHistoryItems,
+  toDateMap,
+  monthPath,
+  monthKeyOf,
+} from "@/utils/history";
+import { todayInSeoul, formatKoreanMonth } from "@/utils/date";
 
-const entries = await getHistoryEntries();
+const entries = await getHistoryItems();
 const entryMap = toDateMap(entries);
 
 const today = todayInSeoul();
 const currentMonth = today.slice(0, 7);
 const availableMonths = [
-  ...new Set([
-    currentMonth,
-    ...entries.map((entry) => toMonthKey(entry.data.date)),
-  ]),
+  ...new Set([currentMonth, ...entries.map((item) => monthKeyOf(item.date))]),
 ].sort();
 
 const monthKey =
   entries.length > 0 &&
-  !entries.some((entry) => toMonthKey(entry.data.date) === currentMonth)
-    ? toMonthKey(entries[0]!.data.date)
+  !entries.some((item) => monthKeyOf(item.date) === currentMonth)
+    ? monthKeyOf(entries[0]!.date)
     : currentMonth;
 
 const archiveMonths = [...availableMonths].reverse();
