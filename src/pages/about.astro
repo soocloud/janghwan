@@ -43,18 +43,6 @@ import {
     </section>
 
     <section class="mt-16">
-      <h2 class="section-title">학력</h2>
-      <Timeline
-        items={education.map((item) => ({
-          period: item.period,
-          primary: item.school,
-          secondary: item.major,
-          note: item.status,
-        }))}
-      />
-    </section>
-
-    <section class="mt-16">
       <h2 class="section-title">현재 직(職)</h2>
       <Timeline
         items={currentPositions.map((item) => ({
@@ -82,6 +70,18 @@ import {
         items={awards.map((item) => ({
           period: item.year,
           primary: item.title,
+        }))}
+      />
+    </section>
+
+    <section class="mt-16">
+      <h2 class="section-title">학력</h2>
+      <Timeline
+        items={education.map((item) => ({
+          period: item.period,
+          primary: item.school,
+          secondary: item.major,
+          note: item.status,
         }))}
       />
     </section>
