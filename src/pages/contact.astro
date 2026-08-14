@@ -22,7 +22,7 @@ const contacts = [
 
 <Layout
   title="연락처"
-  description={`${profile.name}에게 연락하기 — ${profile.email}`}
+  description={`${profile.name} — ${profile.office} ${profile.role.replace(`${profile.office} `, "")}. 강의·자문·집필 문의 안내.`}
 >
   <div class="container-page" data-pagefind-body>
     <PageHeader
