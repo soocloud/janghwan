@@ -27,6 +27,8 @@ const imageModules = import.meta.glob<{ default: ImageMetadata }>(
 
 // 2026-08-11 / 20260811 / 2026.08.11 뒤에 공백·밑줄·하이픈으로 제목을 붙일 수 있습니다.
 const FILE_NAME_PATTERN = /^(\d{4})[-._]?(\d{2})[-._]?(\d{2})(?:[\s_-]+(.+))?$/;
+// 260811 처럼 연도를 두 자리로 줄여 쓴 경우.
+const SHORT_NAME_PATTERN = /^(\d{2})(\d{2})(\d{2})(?:[\s_-]+(.+))?$/;
 
 function parseImageFileName(path: string) {
   const base = path
@@ -36,10 +38,11 @@ function parseImageFileName(path: string) {
     .normalize("NFC")
     .trim();
 
-  const matched = FILE_NAME_PATTERN.exec(base);
+  const matched = FILE_NAME_PATTERN.exec(base) ?? SHORT_NAME_PATTERN.exec(base);
   if (!matched) return null;
 
-  const [, year, month, day, title] = matched;
+  const [, rawYear, month, day, title] = matched;
+  const year = rawYear!.length === 2 ? `20${rawYear}` : rawYear!;
   const date = `${year}-${month}-${day}`;
   // 2026-13-45 처럼 존재하지 않는 날짜 거르기
   if (new Date(`${date}T00:00:00Z`).getUTCDate() !== Number(day)) return null;
