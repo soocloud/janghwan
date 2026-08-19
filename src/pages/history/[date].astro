@@ -75,27 +75,40 @@ const description =
     </header>
 
     {
-      item.image && (
-        <figure class="mb-10">
-          <Image
-            src={item.image}
-            alt={item.imageAlt ?? item.title}
-            widths={[480, 720, 1080]}
-            sizes="(max-width: 768px) 100vw, 720px"
-            loading="eager"
-            class="mx-auto w-full rounded-lg border border-border shadow-sm"
-          />
-          <figcaption class="no-print mt-3 text-center text-xs text-muted">
-            <a
-              href={item.image.src}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="link-underline"
-            >
-              원본 이미지 보기
-            </a>
-          </figcaption>
-        </figure>
+      item.images.length > 0 && (
+        <div class="mb-10 space-y-8">
+          {item.images.map((image, index) => (
+            <figure>
+              <Image
+                src={image}
+                alt={
+                  item.images.length > 1
+                    ? `${item.imageAlt ?? item.title} (${index + 1}/${item.images.length})`
+                    : (item.imageAlt ?? item.title)
+                }
+                widths={[480, 720, 1080]}
+                sizes="(max-width: 768px) 100vw, 720px"
+                loading={index === 0 ? "eager" : "lazy"}
+                class="mx-auto w-full rounded-lg border border-border shadow-sm"
+              />
+              <figcaption class="no-print mt-3 text-center text-xs text-muted">
+                {item.images.length > 1 && (
+                  <span class="mr-2">
+                    {index + 1} / {item.images.length}
+                  </span>
+                )}
+                <a
+                  href={image.src}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="link-underline"
+                >
+                  원본 이미지 보기
+                </a>
+              </figcaption>
+            </figure>
+          ))}
+        </div>
       )
     }
 
