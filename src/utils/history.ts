@@ -59,6 +59,10 @@ function parseImageFileName(path: string) {
     if (partMatch) {
       part = Number(partMatch[1]);
       title = title.replace(PART_SUFFIX_PATTERN, "").trim() || null;
+    } else if (/^\d{1,2}$/.test(title)) {
+      // '260820-2.jpg' 처럼 제목 없이 순번만 붙인 경우
+      part = Number(title);
+      title = null;
     }
   }
 
