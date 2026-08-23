@@ -43,30 +43,34 @@ function parseImageFileName(path: string) {
     .normalize("NFC")
     .trim();
 
-  const matched = FILE_NAME_PATTERN.exec(base) ?? SHORT_NAME_PATTERN.exec(base);
-  if (!matched) return null;
+  // '260821-01' 은 4자리 패턴에도 걸리지만 2608년 21월이 되므로, 유효한 날짜가 나올 때까지 순서대로 시도합니다.
+  for (const pattern of [FILE_NAME_PATTERN, SHORT_NAME_PATTERN]) {
+    const matched = pattern.exec(base);
+    if (!matched) continue;
 
-  const [, rawYear, month, day, rawTitle] = matched;
-  const year = rawYear!.length === 2 ? `20${rawYear}` : rawYear!;
-  const date = `${year}-${month}-${day}`;
-  // 2026-13-45 처럼 존재하지 않는 날짜 거르기
-  if (new Date(`${date}T00:00:00Z`).getUTCDate() !== Number(day)) return null;
+    const [, rawYear, month, day, rawTitle] = matched;
+    const year = rawYear!.length === 2 ? `20${rawYear}` : rawYear!;
+    const date = `${year}-${month}-${day}`;
+    if (new Date(`${date}T00:00:00Z`).getUTCDate() !== Number(day)) continue;
 
-  let title = rawTitle?.trim() || null;
-  let part = 1;
-  if (title) {
-    const partMatch = PART_SUFFIX_PATTERN.exec(title);
-    if (partMatch) {
-      part = Number(partMatch[1]);
-      title = title.replace(PART_SUFFIX_PATTERN, "").trim() || null;
-    } else if (/^\d{1,2}$/.test(title)) {
-      // '260820-2.jpg' 처럼 제목 없이 순번만 붙인 경우
-      part = Number(title);
-      title = null;
+    let title = rawTitle?.trim() || null;
+    let part = 1;
+    if (title) {
+      const partMatch = PART_SUFFIX_PATTERN.exec(title);
+      if (partMatch) {
+        part = Number(partMatch[1]);
+        title = title.replace(PART_SUFFIX_PATTERN, "").trim() || null;
+      } else if (/^\d{1,2}$/.test(title)) {
+        // '260820-2.jpg', '260821-02.jpg' 처럼 제목 없이 순번만 붙인 경우
+        part = Number(title);
+        title = null;
+      }
     }
+
+    return { date, title, part };
   }
 
-  return { date, title, part };
+  return null;
 }
 
 /** 날짜 내림차순(최신 우선) 목록 */
